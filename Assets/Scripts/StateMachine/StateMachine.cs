@@ -3,38 +3,33 @@ using System.Collections.Generic;
 using UnityEngine;
 using NaughtyAttributes;
 
-public class StateMachine : MonoBehaviour
+public class StateMachine<T> where T : System.Enum
 {
-    public enum States    
-    {
-        None,
-    }
 
-    public Dictionary<States, StateBase> dictionaryState;
+    public Dictionary<T, StateBase> dictionaryState;
 
     private StateBase _currentState;
     public float timeToStartGame;
 
-    private void Awake()
+   
+
+    public StateBase CurrentState
     {
-        dictionaryState = new Dictionary<States, StateBase>();
-        dictionaryState.Add(States.None, new StateBase());
-
-        SwitchState(States.None);
-
-        Invoke(nameof(StartGame),timeToStartGame);
+        get {  return _currentState;}
     }
 
-    [Button]
 
-    private void StartGame()
+    public void Init()
     {
-        SwitchState(States.None); 
+        dictionaryState = new Dictionary<T, StateBase>();
     }
 
-    [Button]
+    public void RegisterStates(T typeEnum, StateBase state)
+    {
+        dictionaryState.Add(typeEnum, state);
+    }
 
-    private void SwitchState(States state)
+    public void SwitchState(T state)
     {
         if(_currentState != null)
         {
@@ -45,15 +40,12 @@ public class StateMachine : MonoBehaviour
         _currentState.OnStateEnter();
     }
 
-    private void Update()
+    public void Update()
     {
         if(_currentState != null)
         {
             _currentState.OnStateStay();
         }
-        if(Input.GetKeyDown(KeyCode.Space))
-        {
-            //SwitchState(States.Dead);
-        }
+
     }
 }
