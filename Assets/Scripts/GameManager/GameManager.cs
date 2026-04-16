@@ -4,6 +4,7 @@ using System.Collections;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
+using DG.Tweening;
 public enum GameStates
 {
     INTRO,
@@ -27,6 +28,7 @@ public class GameManager : Singleton<GameManager>
 
     public Transform currentPlayer;
     public PlayerHealthUpdater healthUI;
+    public TextMeshProUGUI checkpointText;
 
     public int lifes = 3;
 
@@ -111,6 +113,28 @@ public class GameManager : Singleton<GameManager>
 
         freeLook.Follow = player.transform;
         freeLook.LookAt = player.transform;
+    }
+
+    public float textDisplayDuration = 2f;
+
+    public void ShowCheckpointText()
+    {
+        StopAllCoroutines();
+        StartCoroutine(CheckpointTextRoutine());
+    }
+
+    IEnumerator CheckpointTextRoutine()
+    {
+        checkpointText.gameObject.SetActive(true);
+        checkpointText.text = "NOVO CHECKPOINT ALCANÇADO!";
+
+        checkpointText.transform.localScale = Vector3.zero;
+        checkpointText.transform.DOScale(1f, 0.5f).SetEase(Ease.OutBack);
+        checkpointText.transform.DOScale(0f, 0.3f).SetEase(Ease.InBack);
+
+        yield return new WaitForSeconds(textDisplayDuration);
+
+        checkpointText.gameObject.SetActive(false);
     }
 
 }
