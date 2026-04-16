@@ -8,6 +8,7 @@ public class EnemyBase : MonoBehaviour, IDamageable
 {
    public AnimationBase animationBase;
     public float health = 10f;
+    public Transform player;
 
     public FlashColor flashColor;
 
@@ -19,8 +20,11 @@ public class EnemyBase : MonoBehaviour, IDamageable
 
     public ParticleSystem deathParticle;
 
+    public bool isDead = false;
+
     private void Awake()
     {
+        CheckPlayerNullity();
         Init();
     }
     protected virtual void Init()
@@ -92,6 +96,17 @@ public class EnemyBase : MonoBehaviour, IDamageable
         if (other.CompareTag("Player"))
         {
             PlayAnimation(AnimationType.Attack);
+        }
+    }
+
+    public void CheckPlayerNullity()
+    {
+        if (player == null)
+        {
+            GameObject p = GameObject.FindGameObjectWithTag("Player");
+
+            if (p != null)
+                player = p.transform;
         }
     }
 

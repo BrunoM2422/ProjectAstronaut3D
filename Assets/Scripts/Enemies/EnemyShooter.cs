@@ -5,7 +5,7 @@ using UnityEngine;
 
 public class EnemyShooter : EnemyBase, IDamageable
 {
-    public Transform player;
+    
     public float range;
     public ProjectileBase projectilePrefab;
     public Transform shootingPosition;
@@ -19,14 +19,14 @@ public class EnemyShooter : EnemyBase, IDamageable
     {
         if (player == null)
         {
-            player = GameObject.FindGameObjectWithTag("Player").transform;
+            player = GameManager.Instance.currentPlayer;
         }
     }
 
     public void Update()
     {
-        
-
+        if (isDead) return;
+        CheckPlayerNullity();
         if (player == null) return;
 
         float distance = Vector3.Distance(transform.position, player.position);
@@ -68,7 +68,7 @@ public class EnemyShooter : EnemyBase, IDamageable
 
     override protected void OnKill()
     {
-        player = null;
+        isDead = true;
         GetComponent<BoxCollider>().enabled = false;
         if (deathParticle != null)
         {

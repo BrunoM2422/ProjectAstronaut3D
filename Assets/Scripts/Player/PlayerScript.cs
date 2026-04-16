@@ -20,12 +20,15 @@ public class PlayerScript : MonoBehaviour, IDamageable
     public PlayerFlashColor flashColor;
     public PlayerHealthUpdater healthUI;
 
+
     [Header("PlayerSettings")]
     public float speed = 1f;
     public float turnSpeed = 1f;
     public float gravity = 9.8f;
     public float jumpSpeed = 15f;
     public float health = 20;
+    public float vSpeed = 0f;
+
 
 
     [Header("PlayerInnerInfo")]
@@ -41,7 +44,16 @@ public class PlayerScript : MonoBehaviour, IDamageable
     public float airControl = 0.5f;
 
     private float lastDamageTime = -Mathf.Infinity;
-    public float vSpeed = 0f;
+    private bool isDead = false;
+
+
+    void Awake()
+    {
+        characterController = GetComponent<CharacterController>();
+
+
+        characterController.enabled = true;
+    }
 
     public void Start()
     {
@@ -64,7 +76,9 @@ public class PlayerScript : MonoBehaviour, IDamageable
     }
     void Update()
     {
-        if (characterController == null) return;
+        if (isDead) return;
+
+        if (characterController == null || !characterController.enabled) return;
 
         stateMachine.Update();
     }
@@ -97,6 +111,7 @@ public class PlayerScript : MonoBehaviour, IDamageable
         if (_currentHealth <= 0)
         {
             stateMachine.SwitchState(PlayerState.Dead);
+            Invoke(nameof(Kill), 1.5f);
         }
     }
 
@@ -108,8 +123,13 @@ public class PlayerScript : MonoBehaviour, IDamageable
 
     protected virtual void OnKill()
     {
+        isDead = true;
+
         characterController.enabled = false;
-        Destroy(gameObject, 0.7f);
+
+        GameManager.Instance.RespawnPlayer();
+
+        Destroy(gameObject);
     }
 
     private void OnControllerColliderHit(ControllerColliderHit hit)
@@ -119,7 +139,6 @@ public class PlayerScript : MonoBehaviour, IDamageable
             OnDamage(1);
         }
     }
-
     #endregion
 
 }

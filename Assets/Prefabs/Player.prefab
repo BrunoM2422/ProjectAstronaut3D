@@ -90,11 +90,12 @@ MonoBehaviour:
   gravity: 9.8
   jumpSpeed: 15
   health: 20
+  vSpeed: 0
   _currentHealth: 0
   invulnerabilityTime: 0.5
   keyRun: 304
   speedRun: 1.5
-  airControl: 0.5
+  airControl: 1
 --- !u!143 &9067854999259593440
 CharacterController:
   m_ObjectHideFlags: 0

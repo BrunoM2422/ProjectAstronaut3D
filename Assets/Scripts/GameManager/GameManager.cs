@@ -1,24 +1,45 @@
+using Assets.Scripts;
+using Cinemachine;
 using System.Collections;
 using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
-using Assets.Scripts;
+public enum GameStates
+{
+    INTRO,
+    GAMEPLAY,
+    PAUSE,
+    WIN,
+    LOSE
+}
 
 public class GameManager : Singleton<GameManager>
 {
-    public enum GameStates
-    {
-        INTRO,
-        GAMEPLAY,
-        PAUSE,
-        WIN,
-        LOSE
-    }
+
+    public CinemachineFreeLook freeLook;
 
     public StateMachine<GameStates> stateMachine;
+
+    public GameObject playerPrefab;
+    public Transform spawnPoint;
+
+    public TextMeshProUGUI lifeText;
+
+    public Transform currentPlayer;
+    public PlayerHealthUpdater healthUI;
+
+    public int lifes = 3;
 
     private void Start()
     {
         Init();
+
+        Vector3 startPos = spawnPoint != null ? spawnPoint.position : transform.position;
+        Quaternion startRot = spawnPoint != null ? spawnPoint.rotation : transform.rotation;
+
+        Spawn(startPos, startRot);
+
+        UpdateLivesUI();
     }
 
     public void Init()
@@ -34,6 +55,62 @@ public class GameManager : Singleton<GameManager>
         stateMachine.SwitchState(GameStates.INTRO);
     }
 
+    
 
+
+    public Transform currentCheckpoint;
+
+
+
+    public void SetCheckpoint(Transform checkpoint)
+    {
+        currentCheckpoint = checkpoint;
+    }
+
+    public void RespawnPlayer()
+    {
+        if (lifes <= 0)
+        {
+            stateMachine.SwitchState(GameStates.LOSE);
+            return;
+        }
+
+        lifes--;
+        UpdateLivesUI();
+
+        if (currentCheckpoint == null)
+        {
+            
+            Spawn(spawnPoint.position, spawnPoint.rotation);
+            return;
+        }
+
+        Vector3 spawnOffset = currentCheckpoint.forward * 2f + Vector3.up * 1.5f;
+        Vector3 spawnPosition = currentCheckpoint.position + spawnOffset;
+
+        Spawn(spawnPosition, currentCheckpoint.rotation);
+    }
+
+    void UpdateLivesUI()
+    {
+        if (lifeText != null)
+        {
+            lifeText.text =lifes.ToString();
+        }
+    }
+
+
+
+    public void Spawn(Vector3 position, Quaternion rotation)
+    {
+        GameObject player = Instantiate(playerPrefab, position, rotation);
+        currentPlayer = player.transform;
+        PlayerScript ps = player.GetComponent<PlayerScript>();
+        ps.healthUI = healthUI;
+
+
+        freeLook.Follow = player.transform;
+        freeLook.LookAt = player.transform;
+    }
 
 }

@@ -5,7 +5,7 @@ using UnityEngine;
 
 public class EnemyBoss : EnemyBase, IDamageable 
 {
-    public Transform player;
+    
     public float speed = 5f;
     public float range;
     public ProjectileBase projectilePrefab;
@@ -16,20 +16,22 @@ public class EnemyBoss : EnemyBase, IDamageable
 
     private float nextShootTime = 0f;
 
-    public int amountPerShot = 6;
-    public float angle = 4f;
+    public int amountPerShot = 12;
+    public float angle = 8f;
 
     private void Start()
     {
         if (player == null)
         {
-            player = GameObject.FindGameObjectWithTag("Player").transform;
+            player = GameManager.Instance.currentPlayer;
         }
     }
 
     public void Update()
     {
+        if (isDead) return;
 
+        CheckPlayerNullity();
         if (player == null) return;
 
         float distance = Vector3.Distance(transform.position, player.position);
@@ -87,7 +89,7 @@ public class EnemyBoss : EnemyBase, IDamageable
 
     override protected void OnKill()
     {
-        player = null;
+        isDead = true;
         GetComponent<BoxCollider>().enabled = false;
         if (deathParticle != null)
         {

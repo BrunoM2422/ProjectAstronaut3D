@@ -5,7 +5,7 @@ using UnityEngine;
 
 public class EnemyChase : EnemyBase, IDamageable
 {
-    public Transform player;
+    
     public float speed = 5f;
     public float range;
 
@@ -13,12 +13,15 @@ public class EnemyChase : EnemyBase, IDamageable
     {
         if(player == null)
         {
-            player = GameObject.FindGameObjectWithTag("Player").transform;
+            player = GameManager.Instance.currentPlayer;
         }
     }
 
      public void Update()
     {
+        if (isDead) return;
+
+        CheckPlayerNullity();
 
         if (player == null) return;
 
@@ -52,7 +55,7 @@ public class EnemyChase : EnemyBase, IDamageable
         {
             deathParticle.Play();
         }
-        player = null;
+        isDead = true;
         Destroy(gameObject, 0.7f);
         PlayAnimation(AnimationType.Death);
 
