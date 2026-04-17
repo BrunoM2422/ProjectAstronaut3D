@@ -1,4 +1,5 @@
 using Animation;
+using Cinemachine;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -19,6 +20,7 @@ public class PlayerScript : MonoBehaviour, IDamageable
     public Animator animator;
     public PlayerFlashColor flashColor;
     public PlayerHealthUpdater healthUI;
+    public TrailRenderer trailRenderer;
 
 
     [Header("PlayerSettings")]
@@ -94,6 +96,24 @@ public class PlayerScript : MonoBehaviour, IDamageable
     {
         if (Time.time < lastDamageTime + invulnerabilityTime)
             return;
+
+        if (EffectsManagert.Instance != null)
+        {
+            EffectsManagert.Instance.ChangeVignette();
+        }
+        else
+        {
+            Debug.LogError("EffectsManager NULL");
+        }
+
+        if (ScreenShaker.Instance != null)
+        {
+            ScreenShaker.Instance.Shake(2f, 2f, 0.2f);
+        }
+        else
+        {
+            Debug.LogError("ScreenShaker NULL");
+        }
 
         lastDamageTime = Time.time;
 
@@ -212,11 +232,13 @@ public class PlayerMoveState : StateBase
 
         if (Input.GetKey(player.keyRun))
         {
+            player.trailRenderer.enabled = true;
             move *= player.speedRun;
             player.animator.speed = player.speedRun;
         }
         else
         {
+            player.trailRenderer.enabled = false;
             player.animator.speed = 1;
         }
 
