@@ -73,6 +73,7 @@ MonoBehaviour:
   destroyTime: 2
   damage: 3
   speed: 150
+  meshRenderer: {fileID: 7133066958874872245}
 --- !u!54 &7235254522889221047
 Rigidbody:
   m_ObjectHideFlags: 0

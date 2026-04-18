@@ -13,7 +13,7 @@ public class Chest : MonoBehaviour
     public void OnTriggerEnter(Collider collision)
     {
         if (collision.gameObject.CompareTag("Player"))
-        {
+        { 
             
             coinParticles.Play();
             OpenChest();

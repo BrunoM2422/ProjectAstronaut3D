@@ -82,6 +82,6 @@ MonoBehaviour:
   speed: 150
   GunUIUpdater: []
   maxShots: 4
-  reloadTime: 0.5
-  amountPerShot: 4
-  angle: 15
+  reloadTime: 3
+  amountPerShot: 8
+  angle: 1

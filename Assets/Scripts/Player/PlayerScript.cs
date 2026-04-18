@@ -3,6 +3,7 @@ using Cinemachine;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using static UnityEngine.Rendering.DebugUI;
 
 public enum PlayerState
 {
@@ -12,7 +13,7 @@ public enum PlayerState
     Dead
 }
 
-public class PlayerScript : MonoBehaviour, IDamageable
+public class PlayerScript : Singleton<PlayerScript>, IDamageable
 {
     [Header("PlayerNeeds")]
     public StateMachine<PlayerState> stateMachine;
@@ -45,16 +46,50 @@ public class PlayerScript : MonoBehaviour, IDamageable
     [Header("Air Control")]
     public float airControl = 0.5f;
 
+    private float oldJumpSpeed;
+
+    [Header("MegaBullets Settings")]
+    public float megaBulletDamageMultiplier = 6f;
+    public float megaBulletSizeMultiplier = 2f;
+
+    private bool isMegaBulletsActive = false;
+    private bool isInfiniteBulletsActive = false;
+
+
+    public enum PowerUpType
+    {
+        InfiniteBullets,
+        SuperJump,
+        MegaBullets,
+        
+
+    }
+
+    [System.Serializable]
+    public class ActivePowerUp
+    {
+        public PowerUpType type;
+        public float timer;
+    }
+
+    private List<ActivePowerUp> activePowerUps = new List<ActivePowerUp>();
+
+    private SkinChanger skinChanger;
+
+    private PowerUpType? lastPowerUp = null;
+
     private float lastDamageTime = -Mathf.Infinity;
     private bool isDead = false;
 
 
-    void Awake()
+    protected override void Awake()
     {
+        base.Awake(); 
+
         characterController = GetComponent<CharacterController>();
-
-
         characterController.enabled = true;
+
+        skinChanger = GetComponent<SkinChanger>();
     }
 
     public void Start()
@@ -82,7 +117,43 @@ public class PlayerScript : MonoBehaviour, IDamageable
 
         if (characterController == null || !characterController.enabled) return;
 
+        UpdatePowerUps();
+
         stateMachine.Update();
+    }
+
+    public void ApplyPowerUp(PowerUpType type, float duration, float value = 0f)
+    {
+        var existing = activePowerUps.Find(p => p.type == type);
+
+        if (existing != null)
+        {
+            existing.timer += duration;
+        }
+        else
+        {
+            activePowerUps.Add(new ActivePowerUp { type = type, timer = duration });
+            StartPowerUp(type, value);
+        }
+
+        
+        lastPowerUp = type;
+        UpdateSkin();
+    }
+    void UpdatePowerUps()
+    {
+        for (int i = activePowerUps.Count - 1; i >= 0; i--)
+        {
+            activePowerUps[i].timer -= Time.deltaTime;
+
+            if (activePowerUps[i].timer <= 0)
+            {
+                var type = activePowerUps[i].type;
+
+                activePowerUps.RemoveAt(i);   
+                EndPowerUp(type);             
+            }
+        }
     }
 
     #region Damage and Death Logic
@@ -160,6 +231,144 @@ public class PlayerScript : MonoBehaviour, IDamageable
         }
     }
     #endregion
+
+    #region PowerUp Logic
+    private void StartPowerUp(PowerUpType type, float value)
+    {
+        switch (type)
+        {
+            case PowerUpType.InfiniteBullets:
+                EnableInfiniteBullets();
+                break;
+
+            case PowerUpType.SuperJump:
+                EnableSuperJump();
+                break;
+
+            case PowerUpType.MegaBullets:
+                EnableMegaBullets();
+                break;
+
+
+        }
+    }
+
+    private void EndPowerUp(PowerUpType type)
+    {
+        switch (type)
+        {
+            case PowerUpType.InfiniteBullets:
+                DisableInfiniteBullets(); 
+                break;
+
+            case PowerUpType.SuperJump:
+                DisableSuperJump();
+                break;
+
+            case PowerUpType.MegaBullets:
+                DisableMegaBullets();
+                break;
+
+
+        }
+        UpdateLastPowerUp();
+        UpdateSkin();
+
+    }
+    #endregion
+
+    void UpdateLastPowerUp()
+    {
+        if (activePowerUps.Count == 0)
+        {
+            lastPowerUp = null;
+            return;
+        }
+
+        lastPowerUp = activePowerUps[activePowerUps.Count - 1].type;
+    }
+
+    void UpdateSkin()
+    {
+        if (skinChanger == null)
+        {
+            Debug.LogError("SkinChanger NULL");
+            return;
+        }
+
+        if (lastPowerUp == null)
+        {
+            skinChanger.ApplySkin(skinChanger.defaultSkin);
+            return;
+        }
+
+        switch (lastPowerUp)
+        {
+            case PowerUpType.InfiniteBullets:
+                skinChanger.ApplySkin(skinChanger.infiniteBulletsSkin);
+                break;
+
+            case PowerUpType.SuperJump:
+                skinChanger.ApplySkin(skinChanger.superJumpSkin);
+                break;
+
+            case PowerUpType.MegaBullets:
+                skinChanger.ApplySkin(skinChanger.megaBulletsSkin);
+                break;
+        }
+    }
+
+
+    #region PowerUp Methods
+    void EnableInfiniteBullets()
+    {
+        isInfiniteBulletsActive = true;
+
+    }
+
+    void DisableInfiniteBullets()
+    {
+        isInfiniteBulletsActive = false;
+    }
+
+    void EnableSuperJump()
+    {
+        oldJumpSpeed = jumpSpeed;
+        jumpSpeed = 50f;
+    }
+
+    void DisableSuperJump()
+    {
+        jumpSpeed = oldJumpSpeed;
+    }
+
+    void EnableMegaBullets()
+    {
+        isMegaBulletsActive = true;
+    }
+
+    void DisableMegaBullets()
+    {
+        isMegaBulletsActive = false;
+    }
+
+    
+
+    public bool IsMegaBulletsActive()
+    {
+        return isMegaBulletsActive;
+    }
+
+    public bool IsInfiniteBulletsActive()
+    {
+        return isInfiniteBulletsActive;
+    }
+
+    #endregion  
+
+
+
+
 
 }
 
