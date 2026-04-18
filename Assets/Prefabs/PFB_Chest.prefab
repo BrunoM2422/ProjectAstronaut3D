@@ -74,6 +74,7 @@ MonoBehaviour:
   animator: {fileID: 978746868674196707}
   coinsAmount: 10
   coinParticles: {fileID: 5199054421639796952}
+  boxCollider: {fileID: 7024567504167593253}
 --- !u!65 &7024567504167593253
 BoxCollider:
   m_ObjectHideFlags: 0

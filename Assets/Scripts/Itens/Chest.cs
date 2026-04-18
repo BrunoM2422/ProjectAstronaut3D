@@ -7,6 +7,7 @@ public class Chest : MonoBehaviour
     public Animator animator;
     public int coinsAmount = 10;
     public ParticleSystem coinParticles;
+    public BoxCollider boxCollider;
 
 
     public void OnTriggerEnter(Collider collision)
@@ -17,8 +18,10 @@ public class Chest : MonoBehaviour
             coinParticles.Play();
             OpenChest();
             ItemManager.Instance.AddCoins(coinsAmount);
+            boxCollider.enabled = false;
 
             Destroy(gameObject, 1f);
+            
         }
     }
 
