@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using Itens;
 
 public class Chest : MonoBehaviour
 {
@@ -17,7 +18,7 @@ public class Chest : MonoBehaviour
             
             coinParticles.Play();
             OpenChest();
-            ItemManager.Instance.AddCoins(coinsAmount);
+            ItemManager.Instance.AddByType(ItemType.Coin, coinsAmount);
             boxCollider.enabled = false;
 
             Destroy(gameObject, 1f);

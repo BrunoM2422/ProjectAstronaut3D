@@ -28,11 +28,11 @@ public class GunShootAngle : GunShootLimit
             projectile.speed = speed;
             projectile.transform.parent = null;
 
-            if (PlayerScript.Instance != null && PlayerScript.Instance.IsMegaBulletsActive())
+            if (GameManager.Instance.currentPlayer.GetComponent<PlayerScript>() != null && GameManager.Instance.currentPlayer.GetComponent<PlayerScript>().IsMegaBulletsActive())
             {
                 projectile.Setup(
-                    PlayerScript.Instance.megaBulletDamageMultiplier,
-                    PlayerScript.Instance.megaBulletSizeMultiplier
+                    GameManager.Instance.currentPlayer.GetComponent<PlayerScript>().megaBulletDamageMultiplier,
+                    GameManager.Instance.currentPlayer.GetComponent<PlayerScript>().megaBulletSizeMultiplier
                 );
             }
 

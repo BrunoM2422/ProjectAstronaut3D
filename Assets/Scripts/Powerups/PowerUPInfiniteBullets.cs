@@ -7,6 +7,6 @@ public class PowerUPInfiniteBullets : PowerUPBase
 {
     protected override void StartPowerUp()
     {
-        PlayerScript.Instance.ApplyPowerUp(PowerUpType.InfiniteBullets, duration);
+        GameManager.Instance.currentPlayer.GetComponent<PlayerScript>().ApplyPowerUp(PowerUpType.InfiniteBullets, duration);
     }
 }

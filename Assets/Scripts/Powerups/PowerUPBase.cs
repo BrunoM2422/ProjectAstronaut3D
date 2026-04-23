@@ -9,7 +9,7 @@ public class PowerUPBase : ItemCollectableBase
 
     protected override void OnCollect()
     {
-        Transform player = PlayerScript.Instance?.transform;
+        Transform player = GameManager.Instance.currentPlayer.GetComponent<PlayerScript>()?.transform;
 
         if (player == null)
         {

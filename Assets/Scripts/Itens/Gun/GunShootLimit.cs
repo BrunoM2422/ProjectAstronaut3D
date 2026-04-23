@@ -38,11 +38,11 @@ public class GunShootLimit : GunBase
 
         while (true)
         {
-            if (PlayerScript.Instance.IsInfiniteBulletsActive() || _currentShots < maxShots)
+            if (GameManager.Instance.currentPlayer.GetComponent<PlayerScript>().IsInfiniteBulletsActive() || _currentShots < maxShots)
             {
                 Shoot();
 
-                if (!PlayerScript.Instance.IsInfiniteBulletsActive())
+                if (!GameManager.Instance.currentPlayer.GetComponent<PlayerScript>().IsInfiniteBulletsActive())
                 {
                     _currentShots++;
                     CheckRecharge();
@@ -56,7 +56,7 @@ public class GunShootLimit : GunBase
 
     private void CheckRecharge()
     {
-        if (PlayerScript.Instance.IsInfiniteBulletsActive())
+        if (GameManager.Instance.currentPlayer.GetComponent<PlayerScript>().IsInfiniteBulletsActive())
             return;
 
         if (_currentShots >= maxShots)
@@ -90,7 +90,7 @@ public class GunShootLimit : GunBase
         if (_recharging)
             return; 
 
-        if (PlayerScript.Instance.IsInfiniteBulletsActive())
+        if (GameManager.Instance.currentPlayer.GetComponent<PlayerScript>().IsInfiniteBulletsActive())
         {
             GunUIUpdater.ForEach(i => i.ShowInfinite());
             return;

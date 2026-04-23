@@ -1,5 +1,6 @@
 using Animation;
 using Cinemachine;
+using Itens;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -13,7 +14,7 @@ public enum PlayerState
     Dead
 }
 
-public class PlayerScript : Singleton<PlayerScript>, IDamageable
+public class PlayerScript : MonoBehaviour, IDamageable
 {
     [Header("PlayerNeeds")]
     public StateMachine<PlayerState> stateMachine;
@@ -24,6 +25,7 @@ public class PlayerScript : Singleton<PlayerScript>, IDamageable
     public TrailRenderer trailRenderer;
 
 
+
     [Header("PlayerSettings")]
     public float speed = 1f;
     public float turnSpeed = 1f;
@@ -31,6 +33,8 @@ public class PlayerScript : Singleton<PlayerScript>, IDamageable
     public float jumpSpeed = 15f;
     public float health = 20;
     public float vSpeed = 0f;
+    public float healAmount = 5f;
+    public float maxHealth = 20f;
 
 
 
@@ -52,8 +56,7 @@ public class PlayerScript : Singleton<PlayerScript>, IDamageable
     public float megaBulletDamageMultiplier = 6f;
     public float megaBulletSizeMultiplier = 2f;
 
-    private bool isMegaBulletsActive = false;
-    private bool isInfiniteBulletsActive = false;
+    
 
 
     public enum PowerUpType
@@ -76,20 +79,23 @@ public class PlayerScript : Singleton<PlayerScript>, IDamageable
 
     private SkinChanger skinChanger;
 
-    private PowerUpType? lastPowerUp = null;
 
+    private PowerUpType? lastPowerUp = null;
     private float lastDamageTime = -Mathf.Infinity;
     private bool isDead = false;
+    private bool isMegaBulletsActive = false;
+    private bool isInfiniteBulletsActive = false;
 
 
-    protected override void Awake()
+    void Awake()
     {
-        base.Awake(); 
 
         characterController = GetComponent<CharacterController>();
         characterController.enabled = true;
 
         skinChanger = GetComponent<SkinChanger>();
+
+  
     }
 
     public void Start()
@@ -114,6 +120,11 @@ public class PlayerScript : Singleton<PlayerScript>, IDamageable
     void Update()
     {
         if (isDead) return;
+
+        if (Input.GetKeyDown(KeyCode.Alpha1)) 
+        { 
+            Heal(); 
+        }
 
         if (characterController == null || !characterController.enabled) return;
 
@@ -155,6 +166,8 @@ public class PlayerScript : Singleton<PlayerScript>, IDamageable
             }
         }
     }
+
+
 
     #region Damage and Death Logic
 
@@ -366,7 +379,28 @@ public class PlayerScript : Singleton<PlayerScript>, IDamageable
 
     #endregion  
 
+    public void Heal()
+    {
+        var item = ItemManager.Instance.itemSetups
+            .Find(i => i.itemType == ItemType.LifePack);
 
+        if (item == null) return;
+
+        if (item.soInt.value > 0)
+        {
+            ItemManager.Instance.RemoveByType(ItemType.LifePack, 1);
+
+            _currentHealth += healAmount;
+
+            if (_currentHealth > maxHealth)
+                _currentHealth = maxHealth;
+
+            if (healthUI != null)
+            {
+                healthUI.UpdateValue(maxHealth, _currentHealth);
+            }
+        }
+    }
 
 
 

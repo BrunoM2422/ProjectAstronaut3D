@@ -7,6 +7,6 @@ public class PowerUPMegaBullets : PowerUPBase
 {
     protected override void StartPowerUp()
     {
-        PlayerScript.Instance.ApplyPowerUp(PowerUpType.MegaBullets, duration);
+        GameManager.Instance.currentPlayer.GetComponent<PlayerScript>().ApplyPowerUp(PowerUpType.MegaBullets, duration);
     }
 }

@@ -38,16 +38,16 @@ public class ProjectileBase : MonoBehaviour
     {
         float finalDamage = newDamage;
 
-        if (PlayerScript.Instance != null && PlayerScript.Instance.IsMegaBulletsActive())
+        if (GameManager.Instance.currentPlayer.GetComponent<PlayerScript>() != null && GameManager.Instance.currentPlayer.GetComponent<PlayerScript>().IsMegaBulletsActive())
         {
-            finalDamage = damage * PlayerScript.Instance.megaBulletDamageMultiplier;
+            finalDamage = damage * GameManager.Instance.currentPlayer.GetComponent<PlayerScript>().megaBulletDamageMultiplier;
         }
 
         damage = (int)finalDamage;
 
         transform.localScale *= scaleMultiplier;
 
-        if (PlayerScript.Instance != null && PlayerScript.Instance.IsMegaBulletsActive())
+        if (GameManager.Instance.currentPlayer.GetComponent<PlayerScript>() != null && GameManager.Instance.currentPlayer.GetComponent<PlayerScript>().IsMegaBulletsActive())
         {
             if (meshRenderer != null)
             {

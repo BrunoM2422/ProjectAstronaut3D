@@ -7,6 +7,6 @@ public class PowerUPSuperJump : PowerUPBase
 {
     protected override void StartPowerUp()
     {
-        PlayerScript.Instance.ApplyPowerUp(PowerUpType.SuperJump, duration);
+        GameManager.Instance.currentPlayer.GetComponent<PlayerScript>().ApplyPowerUp(PowerUpType.SuperJump, duration);
     }
 }
