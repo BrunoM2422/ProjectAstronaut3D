@@ -23,9 +23,10 @@ public class PlayerScript : MonoBehaviour, IDamageable
     public PlayerFlashColor flashColor;
     public PlayerHealthUpdater healthUI;
     public TrailRenderer trailRenderer;
-
-
-
+    public AudioSource jumpAudio;
+    public AudioSource damageAudio;
+    public AudioSource healAudio;
+    
     [Header("PlayerSettings")]
     public float speed = 1f;
     public float turnSpeed = 1f;
@@ -36,13 +37,10 @@ public class PlayerScript : MonoBehaviour, IDamageable
     public float healAmount = 5f;
     public float maxHealth = 20f;
 
-
-
     [Header("PlayerInnerInfo")]
     [SerializeField] private float _currentHealth;
     [SerializeField] private float invulnerabilityTime = 0.5f;
     
-
     [Header("Run Setup")]
     public KeyCode keyRun = KeyCode.LeftShift;
     public float speedRun = 1.5f;
@@ -50,15 +48,11 @@ public class PlayerScript : MonoBehaviour, IDamageable
     [Header("Air Control")]
     public float airControl = 0.5f;
 
-    private float oldJumpSpeed;
-
     [Header("MegaBullets Settings")]
     public float megaBulletDamageMultiplier = 6f;
     public float megaBulletSizeMultiplier = 2f;
 
-    
-
-
+    #region PowerUpSetup
     public enum PowerUpType
     {
         InfiniteBullets,
@@ -67,25 +61,22 @@ public class PlayerScript : MonoBehaviour, IDamageable
         
 
     }
-
-    [System.Serializable]
     public class ActivePowerUp
     {
         public PowerUpType type;
         public float timer;
     }
-
     private List<ActivePowerUp> activePowerUps = new List<ActivePowerUp>();
-
     private SkinChanger skinChanger;
-
-
     private PowerUpType? lastPowerUp = null;
+    #endregion
+
+
     private float lastDamageTime = -Mathf.Infinity;
     private bool isDead = false;
     private bool isMegaBulletsActive = false;
     private bool isInfiniteBulletsActive = false;
-
+    private float oldJumpSpeed;
 
     void Awake()
     {
@@ -95,7 +86,7 @@ public class PlayerScript : MonoBehaviour, IDamageable
 
         skinChanger = GetComponent<SkinChanger>();
 
-  
+
     }
 
     public void Start()
@@ -121,8 +112,22 @@ public class PlayerScript : MonoBehaviour, IDamageable
     {
         if (isDead) return;
 
-        if (Input.GetKeyDown(KeyCode.Alpha1)) 
+        if(Input.GetKeyDown(KeyCode.Escape))
+        {
+
+            if(PauseManager.Instance.isPaused)
+            {
+                PauseManager.Instance.Resume();
+            }
+            else
+            {
+                PauseManager.Instance.Pause();
+            }
+        }
+
+        if (Input.GetKeyDown(KeyCode.H)) 
         { 
+            
             Heal(); 
         }
 
@@ -178,8 +183,13 @@ public class PlayerScript : MonoBehaviour, IDamageable
 
     public void OnDamage(float f)
     {
+        
+
+       
         if (Time.time < lastDamageTime + invulnerabilityTime)
             return;
+
+        damageAudio.Play();
 
         if (EffectsManagert.Instance != null)
         {
@@ -388,6 +398,7 @@ public class PlayerScript : MonoBehaviour, IDamageable
 
         if (item.soInt.value > 0)
         {
+            healAudio.Play();
             ItemManager.Instance.RemoveByType(ItemType.LifePack, 1);
 
             _currentHealth += healAmount;
@@ -511,30 +522,27 @@ public class PlayerJumpState : StateBase
 
     public override void OnStateEnter(object o = null)
     {
+        player.jumpAudio.Play();
         player.vSpeed = player.jumpSpeed;
     }
 
     public override void OnStateStay(object o = null)
     {
+        
         float inputVertical = Input.GetAxis("Vertical");
         float inputHorizontal = Input.GetAxis("Horizontal");
 
-        // Rotação no ar
         player.transform.Rotate(0, inputHorizontal * player.turnSpeed * Time.deltaTime, 0);
 
-        // Movimento base
         var move = player.transform.forward * inputVertical * player.speed;
 
-        // Controle reduzido no ar
         move *= player.airControl;
 
-        // Gravidade
         player.vSpeed -= player.gravity * Time.deltaTime;
         move.y = player.vSpeed;
 
         player.characterController.Move(move * Time.deltaTime);
 
-        // Quando encosta no chão
         if (player.characterController.isGrounded && player.vSpeed <= 0)
         {
             if (inputVertical != 0)

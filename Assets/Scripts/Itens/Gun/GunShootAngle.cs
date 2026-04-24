@@ -20,6 +20,8 @@ public class GunShootAngle : GunShootLimit
             {
                 mult++;
             }
+            
+            shootSound.Play();
             var projectile = Instantiate(projectilePrefab, shootingPosition);
 
             projectile.transform.localPosition = Vector3.zero;

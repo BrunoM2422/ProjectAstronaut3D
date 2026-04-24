@@ -8,6 +8,7 @@ public class GunBase : MonoBehaviour
     public Transform shootingPosition;
     public float timeBetweenShots = 0.3f;
     public float speed = 150;
+    public AudioSource shootSound;
 
     private Coroutine _currentCoroutine;
 
@@ -22,6 +23,7 @@ public class GunBase : MonoBehaviour
 
     public virtual void Shoot()
     {
+        shootSound.Play();
         var projectile = Instantiate(projectilePrefab);
         projectile.transform.position = shootingPosition.position;
         projectile.transform.rotation = shootingPosition.rotation;

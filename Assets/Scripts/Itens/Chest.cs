@@ -9,13 +9,14 @@ public class Chest : MonoBehaviour
     public int coinsAmount = 10;
     public ParticleSystem coinParticles;
     public BoxCollider boxCollider;
+    public AudioSource audioSource;
 
 
     public void OnTriggerEnter(Collider collision)
     {
         if (collision.gameObject.CompareTag("Player"))
         { 
-            
+            audioSource.Play();
             coinParticles.Play();
             OpenChest();
             ItemManager.Instance.AddByType(ItemType.Coin, coinsAmount);
