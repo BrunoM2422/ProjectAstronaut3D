@@ -1,0 +1,6 @@
+{
+    "lastLevel": 1,
+    "coins": 0,
+    "lifePacks": 0,
+    "playerName": "Bruno"
+}

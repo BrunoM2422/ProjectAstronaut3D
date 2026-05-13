@@ -91,7 +91,8 @@ public class PlayerScript : MonoBehaviour, IDamageable
 
     public void Start()
     {
-        _currentHealth = health;
+ 
+        if (_currentHealth <= 0) _currentHealth = health;
 
         stateMachine = new StateMachine<PlayerState>();
         stateMachine.Init();
@@ -105,7 +106,8 @@ public class PlayerScript : MonoBehaviour, IDamageable
 
         if (healthUI != null)
         {
-            healthUI.UpdateValue(health, _currentHealth);
+
+            healthUI.UpdateValue(maxHealth, _currentHealth);
         }
     }
     void Update()
@@ -170,6 +172,17 @@ public class PlayerScript : MonoBehaviour, IDamageable
                 EndPowerUp(type);             
             }
         }
+    }
+
+    public float GetCurrentHealth()
+    {
+        return _currentHealth;
+    }
+
+    public void SetCurrentHealth(float value)
+    {
+        _currentHealth = value;
+        if (healthUI != null) healthUI.UpdateValue(maxHealth, _currentHealth);
     }
 
 

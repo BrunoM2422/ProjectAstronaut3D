@@ -1,10 +1,10 @@
-
 using Cinemachine;
 using System.Collections;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 using DG.Tweening;
+
 public enum GameStates
 {
     INTRO,
@@ -16,15 +16,15 @@ public enum GameStates
 
 public class GameManager : Singleton<GameManager>
 {
-
     public CinemachineFreeLook freeLook;
-
     public StateMachine<GameStates> stateMachine;
 
     public GameObject playerPrefab;
     public Transform spawnPoint;
 
+    [Header("UI Reference")]
     public TextMeshProUGUI lifeText;
+    public GameObject loseScreen; 
 
     public Transform currentPlayer;
     public PlayerHealthUpdater healthUI;
@@ -35,11 +35,39 @@ public class GameManager : Singleton<GameManager>
     private void Start()
     {
         Init();
+        SaveSetup savedData = SaveManager.Instance.Load();
 
-        Vector3 startPos = spawnPoint != null ? spawnPoint.position : transform.position;
-        Quaternion startRot = spawnPoint != null ? spawnPoint.rotation : transform.rotation;
+        Vector3 startPos;
+        Quaternion startRot;
+
+        if (savedData != null)
+        {
+            lifes = savedData.globalLifes;
+
+            if (savedData.hasActiveCheckpoint)
+            {
+                startPos = savedData.checkpointPosition;
+                startRot = Quaternion.identity;
+            }
+            else
+            {
+                startPos = spawnPoint != null ? spawnPoint.position : transform.position;
+                startRot = spawnPoint != null ? spawnPoint.rotation : transform.rotation;
+            }
+        }
+        else
+        {
+            startPos = spawnPoint != null ? spawnPoint.position : transform.position;
+            startRot = spawnPoint != null ? spawnPoint.rotation : transform.rotation;
+        }
 
         Spawn(startPos, startRot);
+
+        if (savedData != null && savedData.hasActiveCheckpoint)
+        {
+            var ps = currentPlayer.GetComponent<PlayerScript>();
+            if (ps != null) ps.SetCurrentHealth(savedData.health);
+        }
 
         UpdateLivesUI();
     }
@@ -57,12 +85,7 @@ public class GameManager : Singleton<GameManager>
         stateMachine.SwitchState(GameStates.INTRO);
     }
 
-    
-
-
     public Transform currentCheckpoint;
-
-
 
     public void SetCheckpoint(Transform checkpoint)
     {
@@ -71,25 +94,34 @@ public class GameManager : Singleton<GameManager>
 
     public void RespawnPlayer()
     {
+        lifes--;
+
+        SaveManager.Instance.SaveItemsAndHealth();
+        SaveManager.Instance.Save();
+
+        UpdateLivesUI();
+
         if (lifes <= 0)
         {
+            SaveManager.Instance.ClearSave();
             stateMachine.SwitchState(GameStates.LOSE);
+
+            if (loseScreen != null) loseScreen.SetActive(true); 
+
+            Cursor.lockState = CursorLockMode.None;
+            Cursor.visible = true;
+
             return;
         }
 
-        lifes--;
-        UpdateLivesUI();
-
         if (currentCheckpoint == null)
         {
-            
             Spawn(spawnPoint.position, spawnPoint.rotation);
             return;
         }
 
         Vector3 spawnOffset = currentCheckpoint.forward * 2f + Vector3.up * 1.5f;
         Vector3 spawnPosition = currentCheckpoint.position + spawnOffset;
-
         Spawn(spawnPosition, currentCheckpoint.rotation);
     }
 
@@ -97,11 +129,9 @@ public class GameManager : Singleton<GameManager>
     {
         if (lifeText != null)
         {
-            lifeText.text =lifes.ToString();
+            lifeText.text = lifes.ToString();
         }
     }
-
-
 
     public void Spawn(Vector3 position, Quaternion rotation)
     {
@@ -109,7 +139,6 @@ public class GameManager : Singleton<GameManager>
         currentPlayer = player.transform;
         PlayerScript ps = player.GetComponent<PlayerScript>();
         ps.healthUI = healthUI;
-
 
         freeLook.Follow = player.transform;
         freeLook.LookAt = player.transform;
@@ -130,11 +159,11 @@ public class GameManager : Singleton<GameManager>
 
         checkpointText.transform.localScale = Vector3.zero;
         checkpointText.transform.DOScale(1f, 0.5f).SetEase(Ease.OutBack);
-        checkpointText.transform.DOScale(0f, 0.3f).SetEase(Ease.InBack);
 
         yield return new WaitForSeconds(textDisplayDuration);
 
-        checkpointText.gameObject.SetActive(false);
+        checkpointText.transform.DOScale(0f, 0.3f).SetEase(Ease.InBack).OnComplete(() => {
+            checkpointText.gameObject.SetActive(false);
+        });
     }
-
 }

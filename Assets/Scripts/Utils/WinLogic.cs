@@ -8,6 +8,7 @@ public class WinLogic : MonoBehaviour
     public BoxCollider winCollider;
     public AudioSource winSound;
     public ParticleSystem winParticles;
+    public int currentLevel;
 
     public void OnTriggerEnter(Collider other)
     {
@@ -17,8 +18,11 @@ public class WinLogic : MonoBehaviour
             winScreen.SetActive(true);
             winSound.Play();
             winParticles.Play();
-            winCollider.enabled = false; 
+            winCollider.enabled = false;
+
+            SaveManager.Instance.SaveLastLevel(currentLevel);
+
+            SaveManager.Instance.ResetCheckpoint();
         }
     }
 }
-
